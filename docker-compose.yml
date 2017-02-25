@@ -1,0 +1,27 @@
+version: '2'
+
+services:
+
+  portainer:
+    image: portainer/portainer
+    container_name: portainer
+    ports:
+      - "9999:9000"
+    environment:
+      - JAVA_OPTS=-Xmx100m
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - docker_network
+
+  rabbit:
+    image: rabbitmq
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+    networks:
+      - docker_network
+
+networks:
+  docker_network:
+    driver: bridge
