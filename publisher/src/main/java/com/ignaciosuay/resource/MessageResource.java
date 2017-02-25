@@ -19,8 +19,9 @@ public class MessageResource {
 
     @RequestMapping(method = RequestMethod.GET, value= "/sendMessage/{message}" )
     public void sendMessage(@PathVariable String message){
-        log.info(message);
+        log.info("Receive message {}",message);
         Message<String> msg = MessageBuilder.withPayload(message).build();
         output.send(msg);
+        log.info("Message sent to the publishers");
     }
 }
