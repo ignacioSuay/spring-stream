@@ -138,8 +138,14 @@ public class SubscriberApplication {
 [/java]
 
 4. RabbitMQ
-
-
+If you preffer not to install your own RabbitMQ broker, the project contains a docker-compose.yml file which starts a RabbtMQ container and exposes the 5672 port.
+To start the container you just need to go to the project folder and run: "docker-compose up".
+  
+  
+In this project I am using RabbitMQ, but Spring Cloud Streams offers a layer of abstraction so you should be able to use any other messaging broker like redis or activeMQ just changing the dependency in the pom file.
+   
+   
+   
 
 
 
