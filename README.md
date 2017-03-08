@@ -1,12 +1,20 @@
 **How to implement asyncronous communication between microservices using Spring Cloud Stream**
 
-Spring Cloud Stream is a framework for building message-driven microservices. 
+Spring Cloud Stream is a framework for building message-driven microservices. In this post, I will use Spring Cloud Stream to show how to connect to microservices using a queue. 
 
-I will use Spring Cloud Stream in this post to show how to connect to microservices using a queue. 
-
-The idea of this project is that we will have one microservice (publisher) which will expose a Rest endpoint and will accept a string as a message. Once the client hits the rest endpoint, the publisher will send a message to the subscriber microservices using a queue. 
+The idea of this project is that we will have one publisher microservice which will expose a Rest endpoint. Once the client hits the rest endpoint, the publisher will send a message to a subscriber microservices through a queue. 
  
+Basically, this project will cover the following scenario:
+ 
+1) The client sends a message to the publisher through a REST endpoint
 
+2) The publisher receives the message and then it send it to a queue in a message broker (Rabbit MQ)
+
+3) The subscriber will receive the message through the queue and process it
+
+Implementation
+==============
+note: Please find the source code in <a href="https://github.com/ignacioSuay/spring-stream">github.</a>
  
 1. Add dependencies
  
@@ -18,10 +26,10 @@ I have created both projects using the http://start.spring.io/ website.
  - spring cloud starter stream rabbit
  - lombok
   
-  The subscriber microservice has the following dependencies:
-   - spring boot
-   - spring cloud starter stream rabbit
-   - lombok
+The subscriber microservice has the following dependencies:
+- spring boot
+- spring cloud starter stream rabbit
+- lombok
    
  Bear in mind that in this project I am using RabbitMQ as a message broker but we could use any other Massage broker like Reddis, ActiveMq or Kafka.
  Also I like to use Lomkok in my projects because reduces the boilerplate code in Java but we don't actually need it for the goal of this project.
