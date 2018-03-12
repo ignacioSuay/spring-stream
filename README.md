@@ -1,6 +1,6 @@
-Spring Cloud Stream is a framework for building message-driven microservices. In this post, I will use Spring Cloud Stream to show how to connect to microservices using a queue. 
+Spring Cloud Stream is a framework for building message-driven microservices. In this post, I use Spring Cloud Stream to connect two microservices through a message broker like RabbitMQ. 
 
-The idea of this project is that we will have one publisher microservice which will expose a Rest endpoint. Once the client hits the rest endpoint, the publisher will send a message to a subscriber microservice through a queue. 
+The idea of this project is that we will have one publisher microservice which will expose a REST endpoint. Once the client hits the REST endpoint, the publisher will send a message to a subscriber microservice through a queue. 
  
 Basically, this project will cover the following scenario:
  
@@ -15,26 +15,26 @@ Basically, this project will cover the following scenario:
 
 <h2>Implementation</h2>
 
-note: Please find the source code in <a href="https://github.com/ignacioSuay/spring-stream">github.</a>
+note: The source code is available in <a href="https://github.com/ignacioSuay/spring-stream">github.</a>
  
 <h3>1. Dependencies</h3>
  
 I have created both projects using the http://start.spring.io/ website. 
  
  The publisher microservice will contain the following dependencies:
- - spring boot
- - spring boot starter web
- - spring cloud starter stream rabbit
- - lombok
+ - Spring boot
+ - Spring boot starter web
+ - Spring cloud starter stream rabbit
+ - Lombok
   
 While the subscriber microservice has the following dependencies:
-- spring boot
-- spring cloud starter stream rabbit
-- lombok
+- Spring boot
+- Spring cloud starter stream rabbit
+- Lombok
    
 Bear in mind that in this project I am using RabbitMQ as a message broker but we could use any other message broker like Reddis, ActiveMq or Kafka. Also I like to use Lomkok in my projects because reduces the boilerplate code in Java but we don't actually need it for the goal of this project.
 
-You could find the <a href="https://github.com/ignacioSuay/spring-stream/blob/master/publisher/pom.xml">producer</a> and <a href="https://github.com/ignacioSuay/spring-stream/blob/master/subscriber/pom.xml">subscriber</a> files in github.
+You could find the <a href="https://github.com/ignacioSuay/spring-stream/blob/master/publisher/pom.xml">producer</a> and <a href="https://github.com/ignacioSuay/spring-stream/blob/master/subscriber/pom.xml">subscriber</a> pom.xml files in github.
  
 <h3>2. Build the publisher microservice</h3>
 
@@ -50,9 +50,9 @@ public interface OutputChannel {
 }
 [/java]
  
-<h3> 2.2. Create a Rest endpoint </h3>
+<h3> 2.2. Create a REST endpoint </h3>
  
-This step is optional, but it will allow us to test the project by sending a message from our browser to the queue. Basically, we will send a message to the endpoint (http://localhsot:8081/sendMessage/my_message), then the resource will get the message and will send it to a queue which the subscriber will be listening. 
+This step is optional, but it will allow us to test the project by sending a message from our browser to the queue. Basically, we will send a message to the endpoint (http://localhsot:8081/sendMessage/), then the resource will get the message and will send it to a queue which the subscriber will be listening. 
 
 [java]
 @RestController
@@ -68,13 +68,12 @@ public class MessageResource {
         log.info("Receive message {}", message);
         Message<String> msg = MessageBuilder.withPayload(message).build();
         channel.output().send(msg);
-        return "Message " + message + " sent to the publishers";
+        return "Message " + message + " sent to the subscribers";
     }
 }
 [/java]
  
-This Rest endpoint receives a String and sends it to the queue using the OuputChannel interface declared in the previous step.
-
+This REST endpoint receives a String and sends it to the queue using the OuputChannel interface declared in the previous step.
 
 <h3>2.3. Set the properties</h3>
 
@@ -134,9 +133,9 @@ queue.name=messageQueue
 spring.cloud.stream.bindings.input.destination=${queue.name}
 </strong>
 
-<h3>3.4. Create the SubscriberApplication class</h3>
+<h3>3.4. Create the Subscriber Application class</h3>
 
-You will need to create a simble spring boot application like:
+You will need to create a simple spring boot application class like:
 [java]
 @SpringBootApplication
 public class SubscriberApplication {
@@ -148,17 +147,26 @@ public class SubscriberApplication {
 [/java]
 
 <h3>4. RabbitMQ</h3>
-If you preffer not to install your own RabbitMQ broker, the project contains a docker-compose.yml file which starts a RabbtMQ container and exposes the 5672 port.
+If you prefer not to install your own RabbitMQ broker, the project contains a docker-compose.yml file which starts a RabbtMQ container and exposes the 5672 port.
 To start the container you just need to go to the project folder and run: "docker-compose up".
     
-In this project I am using RabbitMQ, but Spring Cloud Streams offers a layer of abstraction so you should be able to use any other messaging broker like redis or activeMQ just changing the dependency in the pom file.
+In this project, I am using RabbitMQ but Spring Cloud Streams offers a layer of abstraction so you should be able to use any other messaging broker like Redis or ActiveMQ by just changing the dependency in the pom file.
 
 <h3>How to run it</h3>
 In order to run the project you will need to follow in order the following actions:
 <ol>
-<li> Start RabbitMQ. You can use the docker container from the docker-compose file or run your own instance.</li>
+<li> Start RabbitMQ. You can use the docker container from the docker-compose file or run your own instance</li>
 <li> Start the Subscriber application</li>
 <li> Start the publisher application</li>
 <li> Open a browser and send a message to http://localhost:8081/sendMessage like: http://localhost:8081/sendMessage/HelloWorld</li>
 </ol>
    
+<h3>Asynchronous communication</h3>
+I have seen that you some people have asked me about how the asynchronous communication works. Basically, when the publisher sends the message to the queue and it continues doing any job left without waiting for a response from the subscribers. 
+
+This is how it works:
+<ol>
+<li> The publisher receives a String message through a REST endpoint (this communication is synchronous)</li>
+<li> The publisher builds a message and sends it to the queue (the communication between the publisher and the subscribers is asynchronous) </li>
+<li> The publisher returns "Message {message} sent to the subscribers" to the REST endpoint, without waiting to get any response from the subscribers. 
+</ol>
