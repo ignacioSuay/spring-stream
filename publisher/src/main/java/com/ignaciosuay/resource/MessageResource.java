@@ -22,6 +22,6 @@ public class MessageResource {
         log.info("Receive message {}", message);
         Message<String> msg = MessageBuilder.withPayload(message).build();
         channel.output().send(msg);
-        return "Message " + message + " sent to the publishers";
+        return "Message " + message + " sent to the subscribers";
     }
 }
